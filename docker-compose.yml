@@ -1,0 +1,72 @@
+version: "3.1"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: config/php
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini`
+    networks:
+      - app-network
+
+  webserver:
+    image: nginx:latest
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8000:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  db:
+    image: 'mysql:8'
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - "6006:3306"
+    command: --max_allowed_packet=39505856
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_ROOT_USER=root
+        - MYSQL_DATABASE=test
+        - MYSQL_TCP_PORT=3306
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: 'rabbitmq'
+    restart: unless-stopped
+    tty: true
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    networks:
+      - app-network
+
+volumes:
+  dbdata:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+
