@@ -5,6 +5,8 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@fortawesome/fontawesome-free": "^6.1.1",
+        "@mdi/font": "^6.9.96",
         "axios": "^0.27",
         "laravel-vite-plugin": "^0.4.0",
         "lodash": "^4.17.19",
